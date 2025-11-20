@@ -1,0 +1,6 @@
+{
+  "appId": "com.test.transforme",
+  "appName": "TestTransforme",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
