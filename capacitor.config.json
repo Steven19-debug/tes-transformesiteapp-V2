@@ -1,6 +1,7 @@
+```json
 {
-  "appId": "com.test.transforme",
-  "appName": "TestTransforme",
-  "webDir": "dist",
-  "bundledWebRuntime": false
+"appId": "com.test.transforme",
+"appName": "TestTransforme",
+"webDir": "dist",
+"bundledWebRuntime": false
 }
