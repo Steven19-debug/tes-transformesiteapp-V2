@@ -30,15 +30,14 @@ jobs:
       - name: Build Vite project
         run: npm run build
 
-      # 6️⃣ Synchroniser Capacitor
+           # 6️⃣ Ajouter la plateforme Android (si pas déjà ajoutée)
+      - name: Add Android platform
+        run: npx cap add android
+
+      # 7️⃣ Synchroniser Capacitor
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      # 7️⃣ Construire l’APK via Gradle
-      - name: Build APK
-        run: |
-          cd android
-          ./gradlew assembleDebug
 
       # 8️⃣ Upload de l’APK pour téléchargement
       - name: Upload APK
