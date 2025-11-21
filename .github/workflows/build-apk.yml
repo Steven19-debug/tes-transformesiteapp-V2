@@ -1,14 +1,23 @@
-name: Build Expo APK
+name: Build APK/AAB
 
 on:
   workflow_dispatch:
+    inputs:
+      buildType:
+        description: 'Type de build'
+        required: true
+        default: 'apk'
+        type: choice
+        options:
+          - apk
+          - aab
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Récupérer le code du dépôt
+      # 1️⃣ Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -18,30 +27,29 @@ jobs:
         with:
           node-version: 18
 
-      # 3️⃣ Installer les dépendances npm
+      # 3️⃣ Installer Expo CLI et EAS CLI
+      - name: Install Expo & EAS CLI
+        run: |
+          npm install -g expo-cli eas-cli
+
+      # 4️⃣ Installer les dépendances
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Installer Expo CLI et EAS CLI globalement
-      - name: Install Expo & EAS CLI
-        run: npm install -g expo-cli eas-cli
+      # 5️⃣ Login EAS via secret
+      - name: EAS Login
+        run: eas login --token ${{ secrets.EAS_TOKEN }}
 
-      # 5️⃣ Configurer le token EAS (déjà enregistré dans les Secrets GitHub)
-      - name: Configure EAS
-        run: echo "Using EAS token for authentication"
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+      # 6️⃣ Build Android
+      - name: Build Android
+        run: |
+          eas build --platform android --profile preview --non-interactive --type ${{ github.event.inputs.buildType }}
 
-      # 6️⃣ Builder l'APK Android
-      - name: Build Android APK
-        run: npx eas build --platform android --profile preview --non-interactive
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-
-      # 7️⃣ Récupérer et uploader l'APK généré comme artefact
-      - name: Upload APK
+      # 7️⃣ Télécharger le fichier APK/AAB produit
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: transformesiteapp-apk
+          name: TransformesiteApp-${{ github.event.inputs.buildType }}
           path: |
-            **/*.apk
+            ./build/**/*.apk
+            ./build/**/*.aab
