@@ -1,55 +1,24 @@
-name: Build APK/AAB
-
-on:
-  workflow_dispatch:
-    inputs:
-      buildType:
-        description: 'Type de build'
-        required: true
-        default: 'apk'
-        type: choice
-        options:
-          - apk
-          - aab
-
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
+    env:
+      EAS_TOKEN: ${{ secrets.EAS_TOKEN }}  # <-- Ici le secret GitHub
     steps:
-      # 1️⃣ Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Installer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 3️⃣ Installer Expo CLI et EAS CLI
       - name: Install Expo & EAS CLI
         run: |
           npm install -g expo-cli eas-cli
 
-      # 4️⃣ Installer les dépendances
       - name: Install dependencies
         run: npm install
 
-      # 5️⃣ Login EAS via secret
-      - name: EAS Login
-        run: eas login --token ${{ secrets.EAS_TOKEN }}
-
-      # 6️⃣ Build Android
       - name: Build Android
         run: |
           eas build --platform android --profile preview --non-interactive --type ${{ github.event.inputs.buildType }}
-
-      # 7️⃣ Télécharger le fichier APK/AAB produit
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: TransformesiteApp-${{ github.event.inputs.buildType }}
-          path: |
-            ./build/**/*.apk
-            ./build/**/*.aab
