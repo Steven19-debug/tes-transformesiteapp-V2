@@ -2,37 +2,41 @@ name: Build Android APK/AAB
 
 on:
   workflow_dispatch:
+    inputs:
+      buildType:
+        description: 'Type de build Android (apk ou aab)'
+        required: true
+        default: 'apk'
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Récupérer le dépôt
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Installer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 3️⃣ Installer les dépendances
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Installer EAS CLI
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      # 5️⃣ Lancer le build Android avec le token
       - name: Build Android
         env:
-          EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas build --platform android --profile preview --non-interactive
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --type ${{ github.event.inputs.buildType }}
 
-      # 6️⃣ Télécharger le résultat du build (APK ou AAB) comme artefact
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
