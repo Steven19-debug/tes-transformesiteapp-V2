@@ -1,12 +1,7 @@
-name: Build Android APK/AAB
+name: Build Android APK
 
 on:
   workflow_dispatch:
-    inputs:
-      buildType:
-        description: 'Type de build Android (apk ou aab)'
-        required: true
-        default: 'apk'
 
 jobs:
   build-android:
@@ -27,20 +22,17 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Build Android
+      - name: Build Android APK
         env:
           EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: |
           eas build \
             --platform android \
-            --profile preview \
-            --non-interactive \
-            --type ${{ github.event.inputs.buildType }}
+            --profile apk \
+            --non-interactive
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-build
-          path: |
-            **/*.apk
-            **/*.aab
+          name: android-apk
+          path: "**/*.apk"
