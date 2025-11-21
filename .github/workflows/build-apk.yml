@@ -26,15 +26,13 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      # 5️⃣ Login avec le token stocké comme secret GitHub
-      - name: Login EAS
-        run: eas login --token ${{ secrets.EAS_TOKEN }}
-
-      # 6️⃣ Lancer le build Android
+      # 5️⃣ Lancer le build Android avec le token
       - name: Build Android
+        env:
+          EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: eas build --platform android --profile preview --non-interactive
 
-      # 7️⃣ Télécharger le résultat du build (APK ou AAB) comme artefact
+      # 6️⃣ Télécharger le résultat du build (APK ou AAB) comme artefact
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
