@@ -11,8 +11,7 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    env:
-      EAS_TOKEN: ${{ secrets.EAS_TOKEN }}  # Ton token EAS stocké comme secret GitHub
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,23 +21,28 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Expo CLI & EAS CLI
-        run: |
-          npm install -g expo-cli eas-cli
-
       - name: Install dependencies
         run: npm install
 
-      - name: Build Android
-        run: |
-          eas build --platform android \
-                    --profile preview \
-                    --non-interactive \
-                    --type ${{ github.event.inputs.buildType }}
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
 
-      - name: Upload Build Artifact
+      - name: Login to EAS
+        env:
+          EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas login --non-interactive
+
+      - name: Build Android
+        env:
+          EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: |
+          eas build --platform android --profile ${{ github.event.inputs.buildType }} --non-interactive
+
+      - name: Upload artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: TransformesiteApp-${{ github.event.inputs.buildType }}
+          name: transformesiteapp-${{ github.event.inputs.buildType }}
           path: |
-            $(find . -type f -name "*.apk" -o -name "*.aab")
+            ./build/*.apk
+            ./build/*.aab
