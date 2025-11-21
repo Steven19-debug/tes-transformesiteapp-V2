@@ -1,35 +1,47 @@
-name: Build APK (Expo EAS)
+name: Build Expo APK
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Récupérer le code du dépôt
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Installer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # 3️⃣ Installer les dépendances npm
       - name: Install dependencies
         run: npm install
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
+      # 4️⃣ Installer Expo CLI et EAS CLI globalement
+      - name: Install Expo & EAS CLI
+        run: npm install -g expo-cli eas-cli
 
-      - name: Authenticate with Expo
-        run: eas login --token ${{ secrets.EXPO_TOKEN }}
+      # 5️⃣ Configurer le token EAS (déjà enregistré dans les Secrets GitHub)
+      - name: Configure EAS
+        run: echo "Using EAS token for authentication"
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
 
-      - name: Build APK locally
-        run: eas build -p android --profile preview --local
+      # 6️⃣ Builder l'APK Android
+      - name: Build Android APK
+        run: npx eas build --platform android --profile preview --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
 
+      # 7️⃣ Récupérer et uploader l'APK généré comme artefact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app.apk
-          path: build/*.apk
+          name: transformesiteapp-apk
+          path: |
+            **/*.apk
