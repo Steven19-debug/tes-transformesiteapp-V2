@@ -14,7 +14,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -28,13 +28,18 @@ jobs:
       - name: Install Capacitor Android
         run: npm install @capacitor/android
 
+      - name: Fix Capacitor Java version
+        run: |
+          sed -i 's/sourceCompatibility = .*/sourceCompatibility = JavaVersion.VERSION_17/' android/capacitor-android/build.gradle
+          sed -i 's/targetCompatibility = .*/targetCompatibility = JavaVersion.VERSION_17/' android/capacitor-android/build.gradle
+
       - name: Add Android platform
-        run: npx cap add android
+        run: npx cap add android || echo "Android folder already exists"
 
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      - name: Build APK
+      - name: Build APK (Debug)
         run: |
           cd android
           ./gradlew assembleDebug
@@ -42,5 +47,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
+          name: Donation.apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
